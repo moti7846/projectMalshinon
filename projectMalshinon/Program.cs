@@ -29,6 +29,7 @@ namespace projectMalshinon
                     }
                 }
             }
+            Console.WriteLine("_____________________");
             Console.WriteLine(Fname);
             Console.WriteLine(lname);
             Console.WriteLine(str);
@@ -38,13 +39,15 @@ namespace projectMalshinon
 
         static void Main(string[] args)
         {
-            //report a = report.GetInstance();
+            report a = report.GetInstance();
             //a.searchThePeopleTable("moti", "moiz");
             //a.searchThePeopleTable("moti", "moiz");
             //a.searchThePeopleTable("aaaa", "moiz");
-            //a.searchThePeopleTable("moti", "moz");
-            test("my name is Moti Minzberg i liked piza");
-
+            //Console.WriteLine(a.find_id("aho", "moz"));
+            //test("my name   is Moti Minzberg i liked piza");
+            //report.Qeury("UPDATE people SET num_mentions = num_mentions + 1 WHERE id = 113");
+            //Console.WriteLine("my name is Moti Minzberg i liked piza".Length);
+            a.text_report("my name is Moti Minzberg i liked piza");
         }
     }
 }
