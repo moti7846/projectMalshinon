@@ -4,6 +4,8 @@ CREATE DATABASE  IF NOT EXISTS Malshinon;
 /* Switch to the classicmodels database */
 USE Malshinon;
 
+
+
 /* Create the tables */
 CREATE TABLE People 
 (
