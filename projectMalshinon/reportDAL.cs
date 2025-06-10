@@ -25,8 +25,8 @@ namespace projectMalshinon
             return _reportDAL;
         }
 
-        //מקבל שם ובודק אם הוא קיים אם לא הוא יוצר אותו
-        public void searchThePeopleTable(string first_name, string last_name)
+        //מקבל שם ובודק אם הוא קיים
+        public bool People_in_Table(string first_name, string last_name)
         {
             try
             {
@@ -36,11 +36,33 @@ namespace projectMalshinon
                     string q = $"SELECT * FROM `people` WHERE first_name = '{first_name}'";
                     var cmd = new MySqlCommand(q, connection);
                     var reader = cmd.ExecuteReader();
-                    //Console.WriteLine($"ok => {first_name}");
-                    if (!reader.Read())
-                    {
-                        addPeople(first_name, last_name);
-                    }
+                    return (reader.Read());
+                }
+            }
+            catch (MySqlException ex)
+            {
+                Console.WriteLine("MySQL Error: " + ex.Message);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("General Error: " + ex.Message);
+            }
+            return false;
+        }
+        //מוסיף ל - people
+        public void addPeopleTarget(string first_name, string last_name)
+        {
+            try
+            {
+                using (var connection = new MySqlConnection(connStr))
+                {
+                    connection.Open();
+                    Guid g = Guid.NewGuid();
+                    string t = Convert.ToBase64String(g.ToByteArray()).Substring(2, 8);
+                    string q = $"INSERT INTO `people` (first_name, last_name, type_people, secret_code) VALUES('{first_name}', '{last_name}', 'target', '{t}')";
+                    var cmd = new MySqlCommand(q, connection);
+                    cmd.ExecuteReader();
+                    Console.WriteLine("Added a line ib Database");
                 }
             }
             catch (MySqlException ex)
@@ -52,7 +74,6 @@ namespace projectMalshinon
                 Console.WriteLine("General Error: " + ex.Message);
             }
         }
-        //מוסיף ל - people
         public void addPeople(string first_name, string last_name)
         {
             try
@@ -62,10 +83,10 @@ namespace projectMalshinon
                     connection.Open();
                     Guid g = Guid.NewGuid();
                     string t = Convert.ToBase64String(g.ToByteArray()).Substring(2, 8);
-                    string q = $"INSERT INTO `people` (first_name, last_name, type_people, secret_code) VALUES('{first_name}', '{last_name}', 'reporter', '{t}')";
+                    string q = $"INSERT INTO `people` (first_name, last_name, secret_code) VALUES('{first_name}', '{last_name}', '{t}')";
                     var cmd = new MySqlCommand(q, connection);
                     cmd.ExecuteReader();
-                    Plogging("Added a line ib Database");
+                    Console.WriteLine("Added a line ib Database");
                 }
             }
             catch (MySqlException ex)
@@ -78,9 +99,9 @@ namespace projectMalshinon
             }
         }
         //מוצא ID לפי שם
-        public int find_id(string first_name, string last_name)
+        public int find_id(string first_name)
         {
-            int id = -1;
+            int id = 0;
 
             using (var connection = new MySqlConnection(connStr))
             {
@@ -93,19 +114,13 @@ namespace projectMalshinon
                     id = reader.GetInt32("id");
                 }
             }
-            if (id == -1)
-            {
-                addPeople(first_name, last_name);
-                id = find_id(first_name, last_name);
-            }
             return id;
         }
         //מנתח את טקסט ומוציא את הID של הבן אדם
-        public int text_report_return_id(string str)
+        public string[] text_report_return_name(string str)
         {
             string Fname = null;
-            string lname = null;
-            int id_report;
+            string Lname = null;
 
             string[] parts = str.Split(' ');
             foreach (string s in parts)
@@ -116,24 +131,18 @@ namespace projectMalshinon
                     {
                         Fname = s;
                     }
-                    else if (lname == null)
+                    else if (Lname == null)
                     {
-                        lname = s;
+                        Lname = s;
                         break;
                     }
                 }
             }
-            searchThePeopleTable(Fname, lname);
-            id_report = find_id(Fname, lname);
-            return id_report;
+            return new string[] {Fname, Lname};
         }
         //דיווח
-        public void text_report(string str)
+        public void text_report(string str, int id_report, int id_target)
         {
-            Console.WriteLine("enter your name: ");
-            string[] report = Console.ReadLine().Split();
-            int id_report = find_id(report[0], report[1]);
-            int id_target = text_report_return_id(str);
             using (var connection = new MySqlConnection(connStr))
             {
                 connection.Open();
@@ -188,14 +197,12 @@ namespace projectMalshinon
             if (avg_text >= 100 && count >= 10)
             {
                 Qeury($"UPDATE people SET type_people = 'potential_agent' WHERE id = {id_reporter}");
-                Plogging($"Type of ID: {id_reporter} this year for potential_agent");
+                Console.WriteLine($"Type of ID: {id_reporter} this year for potential_agent");
             }
             if (count_mentions >= 20)
             {
-                Plogging("potential threat alert !");
+                Console.WriteLine("potential threat alert !");
             }
         }
-        //
-
     }
 }

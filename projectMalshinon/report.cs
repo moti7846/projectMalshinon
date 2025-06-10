@@ -12,10 +12,10 @@ namespace projectMalshinon
     internal class report
     {
         static report _report = null;
-        reportDAL dal = reportDAL.GetInstance();
+        reportDAL dal = null;
         private report() { }
 
-        public static report GetInstance()
+        private report GetInstance()
         {
             if (_report == null)
             {
@@ -24,9 +24,24 @@ namespace projectMalshinon
             return _report;
         }
 
-        public void Plogging(string msg)
+        public static void start()
         {
-            Console.WriteLine(msg);
+            reportDAL dal = reportDAL.GetInstance();
+            Console.WriteLine("enter your name: ");
+            string[] report_name = Console.ReadLine().Split();
+            if(!dal.People_in_Table(report_name[0], report_name[1]))
+            {
+                dal.addPeople(report_name[0], report_name[1]);
+            }
+            Console.WriteLine("enter your report: ");
+            string report_text = Console.ReadLine();
+            string[] target_name = dal.text_report_return_name(report_text);
+            if (!dal.People_in_Table(target_name[0], target_name[1]))
+            {
+                dal.addPeopleTarget(target_name[0], target_name[1]);
+            }
+            dal.text_report(report_text, dal.find_id(report_name[0]), dal.find_id(target_name[0]));
+
         }
     }
 }
