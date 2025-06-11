@@ -29,3 +29,11 @@ CREATE TABLE IntelReports
     FOREIGN KEY (reporter_ID) REFERENCES People(id),
     FOREIGN KEY (target_ID) REFERENCES People(id)
 );
+
+-- CREATE TABLE Alerts
+-- (
+--     id INT AUTO_INCREMENT PRIMARY KEY ,
+-- 	target_ID INT, 
+--     created_at DATETIME DEFAULT NOW(),
+--     reason  VARCHAR(250)
+-- );

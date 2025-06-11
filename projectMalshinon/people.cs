@@ -45,6 +45,18 @@ namespace projectMalshinon
         //        Console.WriteLine($"{item.Id}       {item.CodeName}    {item.RealName}    {item.Location}         {item.agentStatus}              {item.MissionsCompleted}");
         //    }
         //}
+        public override string ToString()
+        {
+            return 
+                $"id: {id} - " + 
+                $"first_name: {first_name} - " + 
+                $"last_name: {last_name} - " + 
+                $"secret_code: {secret_code} - " + 
+                $"type_people: {type_people} - " + 
+                $"num_reports: {num_reports} - " + 
+                $"num_mentions: {num_mentions} - "
+                ;
+        }
     }
 }
 
