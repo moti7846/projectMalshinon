@@ -98,7 +98,7 @@ namespace projectMalshinon
             Console.WriteLine("===================================");
             Console.WriteLine("||   1. Report                   ||");
             Console.WriteLine("||   2. Show all alerts          ||");
-            Console.WriteLine("||   2. Exit                     ||");
+            Console.WriteLine("||   0. Exit                     ||");
             Console.WriteLine("===================================");
         }
     }
