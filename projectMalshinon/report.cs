@@ -12,10 +12,10 @@ namespace projectMalshinon
     internal class report
     {
         static report _report = null;
-        DAL dal = null;
         private report() { }
 
-        private report GetInstance()
+        DAL dal_Instance = DAL.GetInstance();
+        public static report GetInstance()
         {
             if (_report == null)
             {
@@ -24,10 +24,9 @@ namespace projectMalshinon
             return _report;
         }
 
-        public static void start()
+        public void start()
         {
-            DAL dal = DAL.GetInstance();
-            dal.Login();
+            dal_Instance.Login();
             menu();
             //Console.WriteLine("enter your name: ");
             //string[] report_name = Console.ReadLine().Split();
@@ -44,12 +43,12 @@ namespace projectMalshinon
             //}
             //dal.text_report(report_text, dal.find_id(report_name[0]), dal.find_id(target_name[0]));
         }
-        private static int ChoiceMenu()
+        private int ChoiceMenu()
         {
             int choice;
             string temp;
 
-            Console.Write("enter yuor choice: ");
+            Console.Write("Enter your choice: ");
             temp = Console.ReadLine();
 
             if (int.TryParse(temp, out choice))
@@ -63,9 +62,8 @@ namespace projectMalshinon
             }
             return choice;
         }
-        private static void menu()
+        private void menu()
         {
-            DAL dal = DAL.GetInstance();
             PrintMenu();
             int choice = ChoiceMenu();
             switch (choice)
@@ -73,14 +71,14 @@ namespace projectMalshinon
                 case 1:
                     //דיווח
                     Console.Clear();
-                    Console.WriteLine("enter your report: ");
+                    Console.WriteLine("Enter your report: ");
                     string msg = Console.ReadLine();
-                    dal.InsertIntelReport(msg);
+                    dal_Instance.InsertIntelReport(msg);
                     break;
                 case 2:
                     // הצגת כל ההתראות
                     Console.Clear();
-                    dal.GetAlerts();
+                    dal_Instance.GetAlerts();
                     break;
                 case 0:
                     //יציאה מהתוכנית
@@ -93,8 +91,10 @@ namespace projectMalshinon
             }
             menu();
         }
-        private static void PrintMenu()
+        private void PrintMenu()
         {
+            //int id = dal_Instance.target.id;
+            //Console.WriteLine(id);
             Console.WriteLine("===================================");
             Console.WriteLine("||   1. Report                   ||");
             Console.WriteLine("||   2. Show all alerts          ||");

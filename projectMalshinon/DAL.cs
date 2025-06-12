@@ -15,6 +15,8 @@ namespace projectMalshinon
         static DAL _DAL = null;
         private string connStr = "server=localhost;user=root;password=;database=malshinon";
         private MySqlConnection _conn;
+        public people report { get; set; }
+        public people target { get; set; }
         public static DAL GetInstance()
         {
             if (_DAL == null)
@@ -23,8 +25,6 @@ namespace projectMalshinon
             }
             return _DAL;
         }
-        people report;
-        people target;
         public void GetPersonByName(string first_name, string last_name, people r_t)
         {
             try
@@ -45,11 +45,11 @@ namespace projectMalshinon
                         r_t.num_reports = reader.GetInt32("num_reports");
                         r_t.num_mentions = reader.GetInt32("num_mentions");
 
-                        if(r_t == report)
+                        if(r_t.first_name == report.first_name)
                         {
                             report = r_t;
                         }
-                        else if(r_t == target)
+                        else if(r_t.first_name == target.first_name)
                         {
                             target = r_t;
                         }
@@ -57,7 +57,7 @@ namespace projectMalshinon
                     else
                     {
                         InsertNewPerson(first_name, last_name);
-                        GetPersonByName(first_name, last_name,r_t);
+                        GetPersonByName(first_name, last_name, new people(first_name, last_name));
                     }
                 }
             }
@@ -90,7 +90,7 @@ namespace projectMalshinon
                     {
                         Console.WriteLine("enter your full name: ");
                         string[] name = Console.ReadLine().Split();
-                        GetPersonByName(name[0], name[1], new people(name[0], name[1]));
+                        GetPersonByName(name[0], name[1], report = new people(name[0], name[1]));
                     }
                 }
             }
@@ -153,7 +153,7 @@ namespace projectMalshinon
         public void InsertIntelReport(string str)
         {
             string[] name = text_report_return_name(str);
-            GetPersonByName(name[0], name[1], target);
+            GetPersonByName(name[0], name[1], target = new people(name[0], name[1]));
             using (var connection = new MySqlConnection(connStr))
             {
                 connection.Open();
@@ -302,7 +302,7 @@ namespace projectMalshinon
             string[] loginig = Console.ReadLine().Split();
             if(loginig.Length == 2)
             {
-                GetPersonByName(loginig[0], loginig[1],new people(loginig[0], loginig[1]));
+                GetPersonByName(loginig[0], loginig[1], report = new people(loginig[0], loginig[1]));
             }
             else if(loginig.Length == 1)
             {

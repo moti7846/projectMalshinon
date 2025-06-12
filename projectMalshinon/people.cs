@@ -15,7 +15,8 @@ namespace projectMalshinon
         public string type_people { get; set; }
         public int num_reports { get; set; }
         public int num_mentions { get; set; }
-
+        
+        public people() { }
         public people(int id, string first_name, string last_name, string secret_code, string type_people, int num_reports, int num_mentions)
         {
             this.id = id;

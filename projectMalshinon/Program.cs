@@ -10,7 +10,8 @@ namespace projectMalshinon
     {
         static void Main(string[] args)
         {
-            report.start();
+            report a = report.GetInstance();
+            a.start();
         }
     }
 }
