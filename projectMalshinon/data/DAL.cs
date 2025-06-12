@@ -224,7 +224,6 @@ namespace projectMalshinon
         }
         public void GetAlerts()
         {
-
             using (var connection = new MySqlConnection(connStr))
             {
                 connection.Open();
@@ -309,5 +308,29 @@ namespace projectMalshinon
                 GetPersonBySecretCode(loginig[0]);
             }
         }
+        //public void GetAllPotentialAgent()
+        //{
+
+        //    using (var connection = new MySqlConnection(connStr))
+        //    {
+        //        connection.Open();
+        //        string q = $"SELECT * FROM `people`";
+        //        var cmd = new MySqlCommand(q, connection);
+        //        var reader = cmd.ExecuteReader();
+        //        while (reader.Read())
+        //        {
+        //            people alerts = new people(
+        //                reader.GetInt32("id"),
+        //                reader.GetString("created_at"),
+        //                reader.GetString("created_at"),
+        //                reader.GetString("created_at"),
+        //                reader.GetString("reason"),
+        //                reader.GetInt32("target_ID"),
+        //                reader.GetInt32("target_ID")
+        //                );
+        //            Console.WriteLine(alerts);
+        //        }
+        //    }
+        //}
     }
 }
