@@ -37,6 +37,15 @@ namespace projectMalshinon
             this.num_mentions = num_mentions;
 
         }
+        public people(string first_name, string last_name)
+        {
+            this.first_name = first_name;
+            this.last_name = last_name;
+        }
+        public people(string secret_code)
+        {
+            this.secret_code = secret_code;
+        }
         //public static void printer(List<people> age)
         //{
         //    Console.WriteLine("id______CodeName______RealName______Location______agentStatus______MissionsCompleted");

@@ -11,6 +11,18 @@ namespace projectMalshinon
 {
     internal class DAL
     {
+        private DAL() { }
+        static DAL _DAL = null;
+        private string connStr = "server=localhost;user=root;password=;database=malshinon";
+        private MySqlConnection _conn;
+        public static DAL GetInstance()
+        {
+            if (_DAL == null)
+            {
+                _DAL = new DAL();
+            }
+            return _DAL;
+        }
         people report;
         people target;
         public void GetPersonByName(string first_name, string last_name, people r_t)
@@ -70,13 +82,15 @@ namespace projectMalshinon
                     var reader = cmd.ExecuteReader();
                     if(reader.Read())
                     {
-                        GetPersonByName(reader.GetString("first_name"), reader.GetString("last_name"), report);
+                        string Fname = reader.GetString("first_name");
+                        string Lname = reader.GetString("last_name");
+                        GetPersonByName(Fname, Lname, new people(Fname, Lname));
                     }
                     else
                     {
                         Console.WriteLine("enter your full name: ");
                         string[] name = Console.ReadLine().Split();
-                        GetPersonByName(name[0], name[1], report);
+                        GetPersonByName(name[0], name[1], new people(name[0], name[1]));
                     }
                 }
             }
@@ -101,7 +115,7 @@ namespace projectMalshinon
                     string q = $"INSERT INTO `people` (first_name, last_name, type_people, secret_code) VALUES('{first_name}', '{last_name}','{type_people}', '{t}')";
                     var cmd = new MySqlCommand(q, connection);
                     cmd.ExecuteReader();
-                    CreateAlert("Added a line ib Database");
+                    CreateAlert(find_id(first_name),"Added a line ib Database");
                 }
             }
             catch (MySqlException ex)
@@ -147,10 +161,7 @@ namespace projectMalshinon
                 var cmd = new MySqlCommand(q, connection);
                 cmd.ExecuteReader();
             }
-            CreateAlert($"Report on {target.first_name} {target.last_name} sent successfully");
-            //Qeury($"UPDATE people SET num_mentions = num_mentions + 1 WHERE id = {id_target}");
-            //Qeury($"UPDATE people SET num_reports = num_reports + 1 WHERE id = {id_report}");
-            //reported(id_report, id_target);
+            CreateAlert(find_id(name[0]),$"Report on {target.first_name} {target.last_name} sent successfully");
         }
         public void UpdateReportCount(people r_t)
         {
@@ -220,9 +231,15 @@ namespace projectMalshinon
                 string q = $"SELECT * FROM `alerts`";
                 var cmd = new MySqlCommand(q, connection);
                 var reader = cmd.ExecuteReader();
-                while(reader.Read())
+                while (reader.Read())
                 {
-                    reader.GetInt32("count_row");
+                    Alerts alerts = new Alerts(
+                        reader.GetInt32("id"),
+                        reader.GetInt32("target_ID"),
+                        reader.GetDateTime("created_at"),
+                        reader.GetString("reason")
+                        );
+                    Console.WriteLine(alerts);
                 }
             }
         }
@@ -260,6 +277,36 @@ namespace projectMalshinon
             if(count >= 3)
             {
                 CreateAlert(target_id, "Rapid reports detected");
+            }
+        }
+        public int find_id(string first_name)
+        {
+            int id = 0;
+
+            using (var connection = new MySqlConnection(connStr))
+            {
+                connection.Open();
+                string q = $"SELECT * FROM `people` WHERE first_name = '{first_name}'";
+                var cmd = new MySqlCommand(q, connection);
+                var reader = cmd.ExecuteReader();
+                while (reader.Read())
+                {
+                    id = reader.GetInt32("id");
+                }
+            }
+            return id;
+        }
+        public void Login()
+        {
+            Console.Write("Enter your name or code: ");
+            string[] loginig = Console.ReadLine().Split();
+            if(loginig.Length == 2)
+            {
+                GetPersonByName(loginig[0], loginig[1],new people(loginig[0], loginig[1]));
+            }
+            else if(loginig.Length == 1)
+            {
+                GetPersonBySecretCode(loginig[0]);
             }
         }
     }

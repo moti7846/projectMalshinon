@@ -204,5 +204,26 @@ namespace projectMalshinon
                 Console.WriteLine("potential threat alert !");
             }
         }
+        public void GetAlerts()
+        {
+
+            using (var connection = new MySqlConnection(connStr))
+            {
+                connection.Open();
+                string q = $"SELECT * FROM `alerts`";
+                var cmd = new MySqlCommand(q, connection);
+                var reader = cmd.ExecuteReader();
+                while (reader.Read())
+                {
+                    Alerts alerts = new Alerts(
+                        reader.GetInt32("id"),
+                        reader.GetInt32("target_ID"),
+                        reader.GetDateTime("created_at"),
+                        reader.GetString("reason")
+                        );
+                    Console.WriteLine(alerts);
+                }
+            }
+        }
     }     
 }
