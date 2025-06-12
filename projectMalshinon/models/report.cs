@@ -23,25 +23,10 @@ namespace projectMalshinon
             }
             return _report;
         }
-
         public void start()
         {
             dal_Instance.Login();
             menu();
-            //Console.WriteLine("enter your name: ");
-            //string[] report_name = Console.ReadLine().Split();
-            //if(!dal.People_in_Table(report_name[0], report_name[1]))
-            //{
-            //    dal.addPeople(report_name[0], report_name[1]);
-            //}
-            //Console.WriteLine("enter your report: ");
-            //string report_text = Console.ReadLine();
-            //string[] target_name = dal.text_report_return_name(report_text);
-            //if (!dal.People_in_Table(target_name[0], target_name[1]))
-            //{
-            //    dal.addPeopleTarget(target_name[0], target_name[1]);
-            //}
-            //dal.text_report(report_text, dal.find_id(report_name[0]), dal.find_id(target_name[0]));
         }
         private int ChoiceMenu()
         {
@@ -80,6 +65,11 @@ namespace projectMalshinon
                     Console.Clear();
                     dal_Instance.GetAlerts();
                     break;
+                //case 3:
+                //    // הצגת כל ההתראות
+                //    Console.Clear();
+                //    dal_Instance.GetAllPotentialAgent();
+                //    break;
                 case 0:
                     //יציאה מהתוכנית
                     Console.WriteLine("good day !");
@@ -93,11 +83,12 @@ namespace projectMalshinon
         }
         private void PrintMenu()
         {
-            //int id = dal_Instance.target.id;
-            //Console.WriteLine(id);
+            int id = dal_Instance.report.id;
+            Console.WriteLine($"Hello id: {id}");
             Console.WriteLine("===================================");
             Console.WriteLine("||   1. Report                   ||");
             Console.WriteLine("||   2. Show all alerts          ||");
+            Console.WriteLine("||   3. Show all potential agent ||");
             Console.WriteLine("||   0. Exit                     ||");
             Console.WriteLine("===================================");
         }
