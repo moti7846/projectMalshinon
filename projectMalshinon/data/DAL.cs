@@ -32,8 +32,9 @@ namespace projectMalshinon
                 using (var connection = new MySqlConnection(connStr))
                 {
                     connection.Open();
-                    string q = $"SELECT * FROM `people` WHERE first_name = '{first_name}'";
+                    string q = "SELECT * FROM `people` WHERE first_name = @first_name";
                     var cmd = new MySqlCommand(q, connection);
+                    cmd.Parameters.AddWithValue("@first_name", first_name);
                     var reader = cmd.ExecuteReader();
                     if(reader.Read())
                     {
@@ -77,8 +78,9 @@ namespace projectMalshinon
                 using (var connection = new MySqlConnection(connStr))
                 {
                     connection.Open();
-                    string q = $"SELECT * FROM `people` WHERE secret_code = '{SecretCode}'";
+                    string q = "SELECT * FROM `people` WHERE secret_code = @SecretCode";
                     var cmd = new MySqlCommand(q, connection);
+                    cmd.Parameters.AddWithValue("@SecretCode", SecretCode);
                     var reader = cmd.ExecuteReader();
                     if(reader.Read())
                     {
@@ -112,8 +114,12 @@ namespace projectMalshinon
                     connection.Open();
                     Guid g = Guid.NewGuid();
                     string t = Convert.ToBase64String(g.ToByteArray()).Substring(2, 8);
-                    string q = $"INSERT INTO `people` (first_name, last_name, type_people, secret_code) VALUES('{first_name}', '{last_name}','{type_people}', '{t}')";
+                    string q = "INSERT INTO `people` (first_name, last_name, type_people, secret_code) VALUES(@first_name, @last_name,@type_people, @t)";
                     var cmd = new MySqlCommand(q, connection);
+                    cmd.Parameters.AddWithValue("@first_name", first_name);
+                    cmd.Parameters.AddWithValue("@last_name", last_name);
+                    cmd.Parameters.AddWithValue("@type_people", type_people);
+                    cmd.Parameters.AddWithValue("@t", t);
                     cmd.ExecuteReader();
                     CreateAlert(find_id(first_name),"Added a line ib Database");
                 }
@@ -157,8 +163,11 @@ namespace projectMalshinon
             using (var connection = new MySqlConnection(connStr))
             {
                 connection.Open();
-                string q = $"INSERT INTO `intelreports` (reporter_ID, target_ID, text_report) VALUES({report.id}, {target.id}, '{str}')";
+                string q = "INSERT INTO `intelreports` (reporter_ID, target_ID, text_report) VALUES(@report, @target, @str)";
                 var cmd = new MySqlCommand(q, connection);
+                cmd.Parameters.AddWithValue("@report", report.id);
+                cmd.Parameters.AddWithValue("@target", target.id);
+                cmd.Parameters.AddWithValue("@str", str);
                 cmd.ExecuteReader();
             }
             CreateAlert(find_id(name[0]),$"Report on {target.first_name} {target.last_name} sent successfully");
@@ -168,8 +177,9 @@ namespace projectMalshinon
             using (var connection = new MySqlConnection(connStr))
             {
                 connection.Open();
-                string q = $"UPDATE people SET num_reports = num_reports + 1 WHERE id = {r_t.id}";
+                string q = "UPDATE people SET num_reports = num_reports + 1 WHERE id = @r_t";
                 var cmd = new MySqlCommand(q, connection);
+                cmd.Parameters.AddWithValue("@r_t", r_t.id);
                 cmd.ExecuteReader();
             }
         }
@@ -178,8 +188,9 @@ namespace projectMalshinon
             using (var connection = new MySqlConnection(connStr))
             {
                 connection.Open();
-                string q = $"UPDATE people SET num_reports = num_reports + 1 WHERE id = {r_t.id}";
+                string q = "UPDATE people SET num_reports = num_reports + 1 WHERE id = @r_t";
                 var cmd = new MySqlCommand(q, connection);
+                cmd.Parameters.AddWithValue("@r_t", r_t.id);
                 cmd.ExecuteReader();
             }
             r_t = Refresh(r_t);
@@ -194,9 +205,10 @@ namespace projectMalshinon
             using (var connection = new MySqlConnection(connStr))
             {
                 connection.Open();
-                string q = $"SELECT COUNT(`reporter_ID`) count_reporter_ID , AVG(LENGTH(`text_report`)) avg_text_report FROM `intelreports` WHERE `reporter_ID` = {r_t.id}";
+                string q = "SELECT COUNT(`reporter_ID`) count_reporter_ID , AVG(LENGTH(`text_report`)) avg_text_report FROM `intelreports` WHERE `reporter_ID` = @r_t";
                 var cmd = new MySqlCommand(q, connection);
                 var reader = cmd.ExecuteReader();
+                cmd.Parameters.AddWithValue("@r_t", r_t.id);
                 if (reader.Read())
                 {
                     avg_text = reader.GetInt32("avg_text_report");
@@ -227,7 +239,7 @@ namespace projectMalshinon
             using (var connection = new MySqlConnection(connStr))
             {
                 connection.Open();
-                string q = $"SELECT * FROM `alerts`";
+                string q = "SELECT * FROM `alerts`";
                 var cmd = new MySqlCommand(q, connection);
                 var reader = cmd.ExecuteReader();
                 while (reader.Read())
@@ -265,8 +277,9 @@ namespace projectMalshinon
             using (var connection = new MySqlConnection(connStr))
             {
                 connection.Open();
-                string q = $"SELECT COUNT(`timestamp`) count_row FROM `intelreports` WHERE `target_ID` = {target_id} AND timestamp BETWEEN NOW() -INTERVAL 15 MINUTE AND NOW()";
+                string q = "SELECT COUNT(`timestamp`) count_row FROM `intelreports` WHERE `target_ID` = @target_id AND timestamp BETWEEN NOW() -INTERVAL 15 MINUTE AND NOW()";
                 var cmd = new MySqlCommand(q, connection);
+                cmd.Parameters.AddWithValue("@target_id", target_id);
                 var reader = cmd.ExecuteReader();
                 while (reader.Read())
                 {
@@ -285,8 +298,9 @@ namespace projectMalshinon
             using (var connection = new MySqlConnection(connStr))
             {
                 connection.Open();
-                string q = $"SELECT * FROM `people` WHERE first_name = '{first_name}'";
+                string q = "SELECT * FROM `people` WHERE first_name = @first_name";
                 var cmd = new MySqlCommand(q, connection);
+                cmd.Parameters.AddWithValue("@first_name", first_name);
                 var reader = cmd.ExecuteReader();
                 while (reader.Read())
                 {
