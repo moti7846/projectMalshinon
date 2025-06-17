@@ -158,43 +158,76 @@ namespace projectMalshinon
         }
         public void InsertIntelReport(string str)
         {
-            string[] name = text_report_return_name(str);
-            GetPersonByName(name[0], name[1], target = new people(name[0], name[1]));
-            using (var connection = new MySqlConnection(connStr))
-            {
-                connection.Open();
-                string q = "INSERT INTO `intelreports` (reporter_ID, target_ID, text_report) VALUES(@report, @target, @str)";
-                var cmd = new MySqlCommand(q, connection);
-                cmd.Parameters.AddWithValue("@report", report.id);
-                cmd.Parameters.AddWithValue("@target", target.id);
-                cmd.Parameters.AddWithValue("@str", str);
-                cmd.ExecuteReader();
+            try
+            { 
+                string[] name = text_report_return_name(str);
+                GetPersonByName(name[0], name[1], target = new people(name[0], name[1]));
+                using (var connection = new MySqlConnection(connStr))
+                {
+                    connection.Open();
+                    string q = "INSERT INTO `intelreports` (reporter_ID, target_ID, text_report) VALUES(@report, @target, @str)";
+                    var cmd = new MySqlCommand(q, connection);
+                    cmd.Parameters.AddWithValue("@report", report.id);
+                    cmd.Parameters.AddWithValue("@target", target.id);
+                    cmd.Parameters.AddWithValue("@str", str);
+                    cmd.ExecuteReader();
+                }
+                CreateAlert(find_id(name[0]),$"Report on {target.first_name} {target.last_name} sent successfully");
             }
-            CreateAlert(find_id(name[0]),$"Report on {target.first_name} {target.last_name} sent successfully");
+            catch (MySqlException ex)
+            {
+                Console.WriteLine("MySQL Error: " + ex.Message);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("General Error: " + ex.Message);
+            }
         }
         public void UpdateReportCount(people r_t)
         {
-            using (var connection = new MySqlConnection(connStr))
+            try
             {
-                connection.Open();
-                string q = "UPDATE people SET num_reports = num_reports + 1 WHERE id = @r_t";
-                var cmd = new MySqlCommand(q, connection);
-                cmd.Parameters.AddWithValue("@r_t", r_t.id);
-                cmd.ExecuteReader();
+                using (var connection = new MySqlConnection(connStr))
+                {
+                    connection.Open();
+                    string q = "UPDATE people SET num_reports = num_reports + 1 WHERE id = @r_t";
+                    var cmd = new MySqlCommand(q, connection);
+                    cmd.Parameters.AddWithValue("@r_t", r_t.id);
+                    cmd.ExecuteReader();
+                }
+            }
+            catch (MySqlException ex)
+            {
+                Console.WriteLine("MySQL Error: " + ex.Message);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("General Error: " + ex.Message);
             }
         }
         public void UpdateMentionCount(people r_t)
         {
-            using (var connection = new MySqlConnection(connStr))
+            try
             {
-                connection.Open();
-                string q = "UPDATE people SET num_reports = num_reports + 1 WHERE id = @r_t";
-                var cmd = new MySqlCommand(q, connection);
-                cmd.Parameters.AddWithValue("@r_t", r_t.id);
-                cmd.ExecuteReader();
+                using (var connection = new MySqlConnection(connStr))
+                {
+                    connection.Open();
+                    string q = "UPDATE people SET num_reports = num_reports + 1 WHERE id = @r_t";
+                    var cmd = new MySqlCommand(q, connection);
+                    cmd.Parameters.AddWithValue("@r_t", r_t.id);
+                    cmd.ExecuteReader();
+                }
+                r_t = Refresh(r_t);
+                Test_15_minutes(r_t.id);
             }
-            r_t = Refresh(r_t);
-            Test_15_minutes(r_t.id);
+            catch (MySqlException ex)
+            {
+                Console.WriteLine("MySQL Error: " + ex.Message);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("General Error: " + ex.Message);
+            }
         }
         public void GetReporterStats(people r_t)
         {
@@ -202,23 +235,34 @@ namespace projectMalshinon
             int count = 0;
 
             r_t = Refresh(r_t);
-            using (var connection = new MySqlConnection(connStr))
+            try
             {
-                connection.Open();
-                string q = "SELECT COUNT(`reporter_ID`) count_reporter_ID , AVG(LENGTH(`text_report`)) avg_text_report FROM `intelreports` WHERE `reporter_ID` = @r_t";
-                var cmd = new MySqlCommand(q, connection);
-                var reader = cmd.ExecuteReader();
-                cmd.Parameters.AddWithValue("@r_t", r_t.id);
-                if (reader.Read())
+                using (var connection = new MySqlConnection(connStr))
                 {
-                    avg_text = reader.GetInt32("avg_text_report");
-                    count = reader.GetInt32("count_reporter_ID");
+                    connection.Open();
+                    string q = "SELECT COUNT(`reporter_ID`) count_reporter_ID , AVG(LENGTH(`text_report`)) avg_text_report FROM `intelreports` WHERE `reporter_ID` = @r_t";
+                    var cmd = new MySqlCommand(q, connection);
+                    var reader = cmd.ExecuteReader();
+                    cmd.Parameters.AddWithValue("@r_t", r_t.id);
+                    if (reader.Read())
+                    {
+                        avg_text = reader.GetInt32("avg_text_report");
+                        count = reader.GetInt32("count_reporter_ID");
+                    }
+                }
+                if (avg_text >= 100 && count >= 10)
+                {
+                    Qeury($"UPDATE people SET type_people = 'potential_agent' WHERE id = {r_t.id}");
+                    CreateAlert(r_t.id, $"Type of ID: {r_t.id} this year for potential_agent");
                 }
             }
-            if (avg_text >= 100 && count >= 10)
+            catch (MySqlException ex)
             {
-                Qeury($"UPDATE people SET type_people = 'potential_agent' WHERE id = {r_t.id}");
-                CreateAlert(r_t.id, $"Type of ID: {r_t.id} this year for potential_agent");
+                Console.WriteLine("MySQL Error: " + ex.Message);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("General Error: " + ex.Message);
             }
         }
         public void GetTargetStats(people r_t)
@@ -236,22 +280,33 @@ namespace projectMalshinon
         }
         public void GetAlerts()
         {
-            using (var connection = new MySqlConnection(connStr))
+            try
             {
-                connection.Open();
-                string q = "SELECT * FROM `alerts`";
-                var cmd = new MySqlCommand(q, connection);
-                var reader = cmd.ExecuteReader();
-                while (reader.Read())
+                using (var connection = new MySqlConnection(connStr))
                 {
-                    Alerts alerts = new Alerts(
-                        reader.GetInt32("id"),
-                        reader.GetInt32("target_ID"),
-                        reader.GetDateTime("created_at"),
-                        reader.GetString("reason")
-                        );
-                    Console.WriteLine(alerts);
+                    connection.Open();
+                    string q = "SELECT * FROM `alerts`";
+                    var cmd = new MySqlCommand(q, connection);
+                    var reader = cmd.ExecuteReader();
+                    while (reader.Read())
+                    {
+                        Alerts alerts = new Alerts(
+                            reader.GetInt32("id"),
+                            reader.GetInt32("target_ID"),
+                            reader.GetDateTime("created_at"),
+                            reader.GetString("reason")
+                            );
+                        Console.WriteLine(alerts);
+                    }
                 }
+            }
+            catch (MySqlException ex)
+            {
+                Console.WriteLine("MySQL Error: " + ex.Message);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("General Error: " + ex.Message);
             }
         }
         public people Refresh(people r_t)
@@ -264,48 +319,80 @@ namespace projectMalshinon
         }
         public void Qeury(string qeury)
         {
-            using (var connection = new MySqlConnection(connStr))
+            try
             {
-                connection.Open();
-                var cmd = new MySqlCommand(qeury, connection);
-                cmd.ExecuteReader();
+                using (var connection = new MySqlConnection(connStr))
+                {
+                    connection.Open();
+                    var cmd = new MySqlCommand(qeury, connection);
+                    cmd.ExecuteReader();
+                }
+            }
+            catch (MySqlException ex)
+            {
+                Console.WriteLine("MySQL Error: " + ex.Message);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("General Error: " + ex.Message);
             }
         }
         public void Test_15_minutes(int target_id)
         {
             int count = 0;
-            using (var connection = new MySqlConnection(connStr))
+            try
             {
-                connection.Open();
-                string q = "SELECT COUNT(`timestamp`) count_row FROM `intelreports` WHERE `target_ID` = @target_id AND timestamp BETWEEN NOW() -INTERVAL 15 MINUTE AND NOW()";
-                var cmd = new MySqlCommand(q, connection);
-                cmd.Parameters.AddWithValue("@target_id", target_id);
-                var reader = cmd.ExecuteReader();
-                while (reader.Read())
+                using (var connection = new MySqlConnection(connStr))
                 {
-                    count = reader.GetInt32("count_row");
+                    connection.Open();
+                    string q = "SELECT COUNT(`timestamp`) count_row FROM `intelreports` WHERE `target_ID` = @target_id AND timestamp BETWEEN NOW() -INTERVAL 15 MINUTE AND NOW()";
+                    var cmd = new MySqlCommand(q, connection);
+                    cmd.Parameters.AddWithValue("@target_id", target_id);
+                    var reader = cmd.ExecuteReader();
+                    while (reader.Read())
+                    {
+                        count = reader.GetInt32("count_row");
+                    }
+                }
+                if(count >= 3)
+                {
+                    CreateAlert(target_id, "Rapid reports detected");
                 }
             }
-            if(count >= 3)
+            catch (MySqlException ex)
             {
-                CreateAlert(target_id, "Rapid reports detected");
+                Console.WriteLine("MySQL Error: " + ex.Message);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("General Error: " + ex.Message);
             }
         }
         public int find_id(string first_name)
         {
             int id = 0;
-
-            using (var connection = new MySqlConnection(connStr))
+            try
             {
-                connection.Open();
-                string q = "SELECT * FROM `people` WHERE first_name = @first_name";
-                var cmd = new MySqlCommand(q, connection);
-                cmd.Parameters.AddWithValue("@first_name", first_name);
-                var reader = cmd.ExecuteReader();
-                while (reader.Read())
+                using (var connection = new MySqlConnection(connStr))
                 {
-                    id = reader.GetInt32("id");
+                    connection.Open();
+                    string q = "SELECT * FROM `people` WHERE first_name = @first_name";
+                    var cmd = new MySqlCommand(q, connection);
+                    cmd.Parameters.AddWithValue("@first_name", first_name);
+                    var reader = cmd.ExecuteReader();
+                    while (reader.Read())
+                    {
+                        id = reader.GetInt32("id");
+                    }
                 }
+            }
+            catch (MySqlException ex)
+            {
+                Console.WriteLine("MySQL Error: " + ex.Message);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("General Error: " + ex.Message);
             }
             return id;
         }
